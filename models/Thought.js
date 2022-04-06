@@ -1,38 +1,5 @@
-
-const { Schema, model, Types } = require('mongoose');
+const { Schema, model } = require('mongoose');
 const dateFormat = require('../utils/dateFormat');
-
-const ThoughtSchema = new Schema(
-    {
-        thoughtText: {
-            type: String,
-            required: true,
-            min: 1,
-            max: 280
-        },
-        createdAt: {
-            type: Date,
-            default: Date.now,
-            get: date => dataFormat(date, 'dddd,mmm dS, yyyy')
-        },
-        username: [
-            {
-                type: String,
-                required: true
-            }
-        ],
-        reactions: [reactionSchema]
-    },
-    {
-        toJSON: {
-            getters: true
-        }
-    }
-)
-
-ThoughtSchema.virtual('reactionCount').get(function(){
-    return this.reactions.length;
-})
 
 
 
@@ -46,7 +13,7 @@ const ReactionSchema = new Schema(
         reactionBody: {
             type: String,
             required: true,
-            max: 280
+            maxlength: 280
         },
         username: {
             type: String,
@@ -55,10 +22,43 @@ const ReactionSchema = new Schema(
         createdAt: {
             type: Date,
             default: Date.now,
-            get: date => dataFormat(date, 'dddd,mmm dS, yyyy')
+            get: createdAtVal => dateFormat(createdAtVal)
         }
     }
 )
+const ThoughtSchema = new Schema(
+    {
+        thoughtText: {
+            type: String,
+            required: true,
+            minlength: 1,
+            maxlength: 280,
+        },
+        createdAt: {
+            type: Date,
+            default: Date.now,
+            get: createdAtVal => dateFormat(createdAtVal)
+        },
+        username: {
+            type: String,
+            required: true
+        },
+        reactions: [ReactionSchema]
+        
+    },
+    {
+        toJSON: {
+            virtuals: true,
+            getters: true
+        }
+    }
+);
+
+ThoughtSchema.virtual('reactionCount').get(function(){
+    return this.reactions.length;
+});
+
+
 
 const Thought = model('Thought', ThoughtSchema);
 module.exports = Thought;
